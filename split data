@@ -1,0 +1,38 @@
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+
+# 1. تحليل علاقة نوع العقد (Contract) بترك الخدمة (Churn)
+plt.figure(figsize=(8, 5))
+sns.barplot(x='Contract', y='Churn', data=df, ci=None, palette='viridis')
+plt.title('Churn Rate by Contract Type')
+plt.ylabel('Churn Rate (Percentage)')
+plt.xlabel('Contract Type')
+plt.show()
+
+# 2. حذف العمود المعرفي الذي لا يحمل قيمة إحصائية للنموذج
+if 'customerID' in df.columns:
+    df = df.drop(columns=['customerID'])
+
+# 3. تحويل المتغيرات النصية الثنائية (Yes/No) إلى (1/0)
+binary_cols = ['partner', 'Dependents', 'PhoneService', 'PaperlessBilling']
+# للتأكد من حالة الأحرف (Lower/Upper case) سنقوم بالتحويل الذكي
+for col in df.columns:
+    if df[col].dtype == 'object' and df[col].nunique() == 2:
+        df[col] = df[col].map({'Yes': 1, 'No': 0, 'Male': 1, 'Female': 0})
+
+# 4. تحويل المتغيرات النصية متعددة الخيارات باستخدام One-Hot Encoding
+# مثل (InternetService, PaymentMethod, Contract)
+categorical_cols = df.select_dtypes(include=['object']).columns.tolist()
+df_encoded = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
+
+# 5. تقسيم البيانات إلى متغيرات مستقلة (X) ومتغير مستهدف (y)
+X = df_encoded.drop(columns=['Churn'])
+y = df_encoded['Churn']
+
+# 6. تقسيم البيانات إلى مجموعتي التدريب والاختبار (80% تدريب، 20% اختبار)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+print("✅ تم تجهيز البيانات وتقسيمها بنجاح!")
+print(f"📐 حجم مجموعة التدريب (X_train): {X_train.shape}")
+print(f"📐 حجم مجموعة الاختبار (X_test): {X_test.shape}")
