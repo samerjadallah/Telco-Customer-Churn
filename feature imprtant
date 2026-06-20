@@ -1,0 +1,25 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 1. استخراج الميزات وترتيبها حسب الأهمية
+importances = model.feature_importances_
+feature_names = X.columns
+
+# إنشاء جدول يحتوي على الميزة ونسبة أهميتها
+feature_imp_df = pd.DataFrame({'Feature': feature_names, 'Importance': importances})
+feature_imp_df = feature_imp_df.sort_values(by='Importance', ascending=False).head(10) # سنعرض أهم 10 ميزات
+
+# 2. رسم الميزات بيانيّاً
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Importance', y='Feature', data=feature_imp_df, palette='magma')
+plt.title('Top 10 Important Features in Predicting Customer Churn')
+plt.xlabel('Importance Score')
+plt.ylabel('Features')
+plt.tight_layout()
+plt.show()
+
+# 3. طباعة الميزات بشكل نصي مرتب
+print("🏆 أهم 10 عوامل تؤثر على انفضاض العملاء:")
+for index, row in feature_imp_df.iterrows():
+    print(f"- {row['Feature']}: {row['Importance']*100:.2f}%")
